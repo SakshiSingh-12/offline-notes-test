@@ -1,14 +1,9 @@
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      // TODO: Implement logic to fetch notes from your chosen data store (e.g., MongoDB, PostgreSQL, JSON file).
-      // - Connect to the database/data source.
-      // - Fetch all notes.
-      // - Consider sorting notes, e.g., by creation date (descending).
-      // - Replace the example response below with the actual notes.
-
-      const notes = []; // Example empty array
-
+      const { connectToMongoDB } = require('../../utils/mongo');
+      const db = await connectToMongoDB();
+      const notes = await db.collection('notes').find().sort({ createdAt: -1 }).toArray();
       res.status(200).json(notes);
     } catch (error) {
       console.error('Error fetching notes:', error);

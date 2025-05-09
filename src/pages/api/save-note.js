@@ -9,16 +9,18 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid note data' });
       }
 
-      // TODO: Implement logic to save the note to your chosen data store.
-      // - Connect to the database/data source.
-      // - Save the noteData object.
-      // - Retrieve the unique identifier assigned by the data store (e.g., MongoDB _id, SQL primary key).
-      // - Replace the example response below with the actual assigned identifier.
-      
-      const insertedId = noteData.localId; // Placeholder: Use localId as temporary example ID
+      const { connectToMongoDB } = require('../../utils/mongo');
+      const db = await connectToMongoDB();
 
-      // Respond with the identifier the client expects
-      res.status(200).json({ insertedId: insertedId });
+      // Save the noteData object to the 'notes' collection
+      // Ensure tags is always an array
+      if (!Array.isArray(noteData.tags)) {
+        noteData.tags = [];
+      }
+      const result = await db.collection('notes').insertOne(noteData);
+
+      // Respond with the identifier assigned by MongoDB
+      res.status(200).json({ insertedId: result.insertedId });
     } catch (error) {
       console.error('Error saving note:', error);
       res.status(500).json({ error: 'Failed to save note' });

@@ -3,22 +3,27 @@ export default async function handler(req, res) {
   if (req.method === 'PUT') {
     try {
       const { id } = req.query; // ID of the note to edit (likely localId stored as _id by client)
-      const { title: noteTitle } = req.body; // New title
+      const { title: noteTitle, tags } = req.body; // New title and tags
 
       if (!id || typeof noteTitle !== 'string') {
         return res.status(400).json({ error: 'Missing note ID or title' });
       }
 
-      // TODO: Implement logic to update the note in your chosen data store.
-      // - Connect to the database/data source.
-      // - Find the note by its unique identifier (`id`).
-      // - Update the note's title to `noteTitle`.
-      // - Handle the case where the note is not found.
-      // - Replace the example response below.
+      const { connectToMongoDB } = require('../../utils/mongo');
+      const db = await connectToMongoDB();
+      const { ObjectId } = require('mongodb');
 
-      const noteFound = true; // Placeholder
+      // Build update object
+      const updateObj = { title: noteTitle };
+      if (tags !== undefined) {
+        updateObj.tags = Array.isArray(tags) ? tags : [];
+      }
+      const result = await db.collection('notes').updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updateObj }
+      );
 
-      if (noteFound) {
+      if (result.matchedCount > 0) {
         res.status(200).json({ message: 'Note edited successfully' });
       } else {
         res.status(404).json({ error: 'Note not found' });
