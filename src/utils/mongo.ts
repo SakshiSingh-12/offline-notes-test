@@ -42,5 +42,5 @@ export async function closeMongoDBConnection(): Promise<void> {
     }
 }
 
-
+// Export a type-safe database connection
 export type Database = Awaited<ReturnType<typeof connectToMongoDB>>;
